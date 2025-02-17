@@ -6,8 +6,9 @@ import PollUI from "@/components/PollUI";
 import Balloon from "@/components/Balloon";
 import Link from "next/link";
 
-export default async function PollPage({ params }: { params: { poll_id: string } }) {
-    const pollId = params.poll_id;
+export default async function PollPage({ params }: { params: Promise<{ poll_id: string }> }) {
+    const resolvedParams = await params;
+    const pollId = resolvedParams.poll_id;
 
     const req = await fetch(`${PARTYKIT_URL}/party/${pollId}`, {
         method: "GET",
@@ -43,14 +44,15 @@ export default async function PollPage({ params }: { params: { poll_id: string }
     );
 }
 
-export async function generateMetadata({ params }: { params: { poll_id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ poll_id: string }> }) {
+    const resolvedParams = await params;
     const attrs = {
         title: "A live poll created using PartyKit!",
         cta: "Vote now!",
     };
 
     try {
-        const req = await fetch(`${PARTYKIT_URL}/party/${params.poll_id}`);
+        const req = await fetch(`${PARTYKIT_URL}/party/${resolvedParams.poll_id}`);
         if (req.ok) {
             const res = await req.json();
             if (res.title) {
